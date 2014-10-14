@@ -16,6 +16,10 @@ Requires:	java-1.7.0-openjdk
 %description
 Kafka is a distributed, partitioned, replicated commit log service. It provides the functionality of a messaging system, but with a unique design. 
 
+%pre
+grep kafka /etc/group > /dev/null|| groupadd kafka
+grep kafka /etc/passwd > /dev/null || useradd -g kafka -r -d /opt/kafka kafka
+
 %prep
 %setup -a 0 -qn %{name}-%{version}-src
 
@@ -27,6 +31,7 @@ mkdir %{buildroot}/opt/%{name}-%{version}/logs
 %install
 cd %{buildroot}/opt/%{name}-%{version}
 ./gradlew jar
+chown -R kafka:kafka %{buildroot}/opt/%{name}-%{version}
 
 %post
 cd /opt
@@ -44,5 +49,7 @@ rm -rf %{buildroot}
 %changelog
 * Mon Oct 13 2014 Sebastien Le Digabel <sledigab@cisco.com> - 1.0 
 - initial spec file
+* Tue Oct 14 2014 Sebastien Le Digabel <sledigab@cisco.com> - 1.1
+- Adding user/group creation
 
 

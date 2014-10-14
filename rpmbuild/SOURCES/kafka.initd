@@ -10,11 +10,12 @@
 . /etc/rc.d/init.d/functions
 
 USER=kafka
-PIDFILE=/var/run/kafka.pid
+PIDFILE_TEMPLATE="/var/run/kafka-"
 DAEMON_PATH=/opt/kafka/current/bin
 DAEMON_NAME=kafka
 SCRIPT_NAME=kafka-server-start.sh
 CONFIGFILES_PATH=/opt/kafka/config
+CONFIGFILES_FILTER=server
 
 # Source config
 if [ -f /etc/sysconfig/$DAEMON_NAME ] ; then
@@ -22,31 +23,39 @@ if [ -f /etc/sysconfig/$DAEMON_NAME ] ; then
 fi
 
 # checking how many config files are to be checked
+CONFIGFILES=(${CONFIGFILES_PATH}/${CONFIGFILES_FILTER}*)
 
 # how to start
 start() {
   [ -x "$DAEMON_PATH/$DAEMON_NAME" ] || exit 5
   # Start daemon.
-  echo -n "Starting $DAEMON_NAME: ";echo
-
+  echo -n "Starting $DAEMON_NAME:$1 ";echo
+  daemon --user=$USER --pidfile=${PIDFILE_TEMPLATE}${1}.pid $DAEMON_PATH/$SCRIPT_NAME $1 $KAFKAOPTIONS
+  RETVAL=$?
+  return $RETVAL
 }
 
 stop() {
   # Stop daemons.
-  echo -n "Shutting down $DAEMON_NAME: ";echo
-
+  echo -n "Shutting down $DAEMON_NAME:$1 ";echo
+  killproc -p "${PIDFILE_TEMPLATE}${1}.pid" $DAEMON_PATH/$SCRIPT_NAME
+  RETVAL=$?
+  return $RETVAL
 }
 
 status() {
+  echo -n "Status of $DAEMON_NAME:$1 ";echo
+  status -p "${PIDFILE_TEMPLATE}${1}.pid" "java"
+  
 
 }
 
 case "$1" in
   start)
-        /bin/su $USER $DAEMON_PATH/kafka-server-start.sh
-/usr/local/kafka/config/server.properties &
-        ;;
+    start $CONFIGFILE
+    ;;
   stop)
+    stop $CONFIGFILE
         #$DAEMON_PATH/kafka-server-stop.sh
 ps ax | grep -i 'kafka.Kafka' | grep -v grep | awk '{print $1}' | xargs kill
         ;;
