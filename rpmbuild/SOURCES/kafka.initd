@@ -46,8 +46,6 @@ stop() {
 status() {
   echo -n "Status of $DAEMON_NAME:$1 ";echo
   status -p "${PIDFILE_TEMPLATE}${1}.pid" "java"
-  
-
 }
 
 case "$1" in

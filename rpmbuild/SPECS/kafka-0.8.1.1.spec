@@ -7,6 +7,7 @@ Group:		Communication/Message queue
 License:	Apache 2.0
 URL:		http://kafka.apache.org/
 Source0:	http://apache.mirrors.lucidnetworks.net/kafka/0.8.1.1/kafka-0.8.1.1-src.tgz
+Source1:    kafka.initd
 BuildRoot:	%(mktemp -ud %{_tmppath}/%{name}-%{version}-%{release}-XXXXXX)
 
 BuildRequires:	java-1.7.0-openjdk-devel
@@ -22,10 +23,13 @@ grep kafka /etc/passwd > /dev/null || useradd -g kafka -r -d /opt/kafka kafka
 
 %prep
 %setup -a 0 -qn %{name}-%{version}-src
+%setup -a 1 -q
 
 %build
 mkdir -p %{buildroot}/opt/%{name}-%{version}
+mkdir -p %{buildroot}/etc/rc.d/init.d
 cp -rp %{name}-%{version}-src %{buildroot}/opt/%{name}-%{version}
+cp -p %{source1} mkdir -p %{buildroot}/etc/rc.d/init.d/
 mkdir %{buildroot}/opt/%{name}-%{version}/logs
 
 %install
@@ -43,6 +47,7 @@ rm -rf %{buildroot}
 %files
 %defattr(-,root,root,-)
 /opt/%{name}-{version}
+/etc/rc.d/init.d/
 %doc LICENSE NOTICE HEADER
 
 
@@ -51,5 +56,7 @@ rm -rf %{buildroot}
 - initial spec file
 * Tue Oct 14 2014 Sebastien Le Digabel <sledigab@cisco.com> - 1.1
 - Adding user/group creation
+* Tue Oct 14 2014 Sebastien Le Digabel <sledigab@cisco.com> - 1.2
+- Adding init file
 
 
