@@ -20,25 +20,28 @@ Kafka is a distributed, partitioned, replicated commit log service. It provides 
 %setup -a 0 -qn %{name}-%{version}-src
 
 %build
-mkdir -p %{buildroot}/opt/%{name}-%{version}
-cp -rp %{name}-%{version}-src %{buildroot}/opt/%{name}-%{version}
-mkdir %{buildroot}/opt/%{name}-%{version}/logs
+mkdir -p %{buildroot}/opt/%{name}/
+cp -rp %{name}-%{version}-src %{buildroot}/opt/%{name}/%{version}
+mkdir %{buildroot}/opt/%{name}/%{version}/logs
 
 %install
-cd %{buildroot}/opt/%{name}-%{version}
+cd %{buildroot}/opt/%{name}/%{version}
 ./gradlew jar
 
 %post
-cd /opt
-ln -f -s %{name}-%{version} %{name}
+cd /opt/%{name}/
+ln -f -s %{version} current
+
 
 %clean
 rm -rf %{buildroot}
 
+
 %files
 %defattr(-,root,root,-)
-/opt/%{name}-{version}
+/opt/%{name}/%{version}
 %doc LICENSE NOTICE HEADER
+
 
 
 %changelog
