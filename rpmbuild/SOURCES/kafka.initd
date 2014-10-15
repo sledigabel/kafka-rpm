@@ -48,23 +48,25 @@ status() {
   status -p "${PIDFILE_TEMPLATE}${1}.pid" "java"
 }
 
-case "$1" in
-  start)
-    start $CONFIGFILE
-    ;;
-  stop)
-    stop $CONFIGFILE
-        #$DAEMON_PATH/kafka-server-stop.sh
-ps ax | grep -i 'kafka.Kafka' | grep -v grep | awk '{print $1}' | xargs kill
-        ;;
-  restart)
-        $0 stop
-sleep 1
-        $0 start
-        ;;
-  *)
-        echo "Usage: $0 {start|stop|restart}"
-        exit 1
-esac
+for CONFIGFILE in $CONFIGFILES
+do
+  case "$1" in
+    start)
+      start $CONFIGFILE
+      ;;
+    stop)
+      stop $CONFIGFILE
+      ;;
+    restart)
+      $0 stop $CONFIGFILE && sleep 1 && $0 start $CONFIGFILE
+      ;;
+    status)
+      $0 status
+    *)
+      echo "Usage: $0 {start|stop|restart}"
+      exit 1
+  esac
+done
+
 exit 0
 
