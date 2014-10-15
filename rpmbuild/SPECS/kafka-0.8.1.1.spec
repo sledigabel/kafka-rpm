@@ -22,41 +22,40 @@ grep kafka /etc/group > /dev/null|| groupadd kafka
 grep kafka /etc/passwd > /dev/null || useradd -g kafka -r -d /opt/kafka kafka
 
 %prep
+rm -rf %{buildroot}/*
 %setup -a 0 -qn %{name}-%{version}-src
-%setup -a 1 -q
 
 %build
-mkdir -p %{buildroot}/opt/%{name}-%{version}
-mkdir -p %{buildroot}/etc/rc.d/init.d
-cp -rp %{name}-%{version}-src %{buildroot}/opt/%{name}-%{version}
-cp -p %{source1} mkdir -p %{buildroot}/etc/rc.d/init.d/
+%{__mkdir} -p %{buildroot}/opt
+%{__mkdir} -p %{buildroot}/etc/init.d
+cp -pr %{name}-%{version}-src %{buildroot}/opt/%{name}-%{version}
+%{__install} -m 0755 -p %SOURCE1 %{buildroot}/etc/init.d/kafka
 mkdir %{buildroot}/opt/%{name}-%{version}/logs
 
 %install
 cd %{buildroot}/opt/%{name}-%{version}
 ./gradlew jar
-chown -R kafka:kafka %{buildroot}/opt/%{name}-%{version}
 
 %post
-cd /opt
-ln -f -s %{name}-%{version} %{name}
+ln -f -s /opt/%{name}-%{version} /opt/%{name}
+chown -R kafka:kafka /opt/%{name}-%{version}
 
 %clean
 rm -rf %{buildroot}
 
 %files
 %defattr(-,root,root,-)
-/opt/%{name}-{version}
-/etc/rc.d/init.d/
+/opt/%{name}-%{version}
+/etc/init.d/kafka
 %doc LICENSE NOTICE HEADER
 
 
 %changelog
-* Mon Oct 13 2014 Sebastien Le Digabel <sledigab@cisco.com> - 1.0 
-- initial spec file
-* Tue Oct 14 2014 Sebastien Le Digabel <sledigab@cisco.com> - 1.1
-- Adding user/group creation
 * Tue Oct 14 2014 Sebastien Le Digabel <sledigab@cisco.com> - 1.2
 - Adding init file
+* Tue Oct 14 2014 Sebastien Le Digabel <sledigab@cisco.com> - 1.1
+- Adding user/group creation
+* Mon Oct 13 2014 Sebastien Le Digabel <sledigab@cisco.com> - 1.0 
+- initial spec file
 
 
