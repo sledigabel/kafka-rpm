@@ -31,21 +31,23 @@ start() {
   # Start daemon.
   echo -n "Starting $DAEMON_NAME:$1 ";echo
   daemon --user=$USER --pidfile=${PIDFILE_TEMPLATE}${1}.pid $DAEMON_PATH/$SCRIPT_NAME $1 $KAFKAOPTIONS
-  RETVAL=$?
-  return $RETVAL
+  LOCALRETVAL=$?
+  return $LOCALRETVAL
 }
 
 stop() {
   # Stop daemons.
   echo -n "Shutting down $DAEMON_NAME:$1 ";echo
   killproc -p "${PIDFILE_TEMPLATE}${1}.pid" $DAEMON_PATH/$SCRIPT_NAME
-  RETVAL=$?
-  return $RETVAL
+  LOCALRETVAL=$?
+  return $LOCALRETVAL
 }
 
 status() {
   echo -n "Status of $DAEMON_NAME:$1 ";echo
   status -p "${PIDFILE_TEMPLATE}${1}.pid" "java"
+  LOCALRETVAL=$?
+  return $LOCALRETVAL
 }
 
 for CONFIGFILE in $CONFIGFILES
@@ -53,19 +55,27 @@ do
   case "$1" in
     start)
       start $CONFIGFILE
+      RETVAL=$?
       ;;
     stop)
       stop $CONFIGFILE
+      RETVAL=$?
       ;;
     restart)
       $0 stop $CONFIGFILE && sleep 1 && $0 start $CONFIGFILE
+      RETVAL=$?
       ;;
     status)
       $0 status
+      RETVAL=$?
     *)
       echo "Usage: $0 {start|stop|restart}"
       exit 1
   esac
+  if [ "$RETVAL" != "0" ]
+    then echo "failed."
+    exit $RETVAL
+  fi
 done
 
 exit 0
